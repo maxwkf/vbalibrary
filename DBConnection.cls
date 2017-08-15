@@ -8,15 +8,16 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
-' use the import function to import this vbs
+
 Public connection As ADODB.connection
-Public Recordset As ADODB.Recordset
 Private connectionString As String
+Private level As Integer
+Public cmd As ADODB.command
 
 ' Event - triggered when class created
 Private Sub Class_Initialize()
-	' no need to replace {SQL Server}
-    connectionString = "Driver={SQL Server};Server={{SERVER}};Database=accreditation; UID={{UID}}; 
+    connectionString = "Driver={SQL Server};Server={{Server}};Database=accreditation; UID={{UserID}}; PWD={{Password}}"
+    
 End Sub
 
 'https://www.youtube.com/watch?v=5Zv-iNyzMzI
@@ -28,8 +29,10 @@ On Error GoTo Cleanup
     Set connection = New ADODB.connection
         
     connection.Open (connectionString)
-    connection.BeginTrans
-        
+    level = connection.BeginTrans
+    
+    Set cmd = New ADODB.command
+    cmd.ActiveConnection = connection
 Cleanup:
     If (Err.Number <> 0) Then
         Debug.Print Err.Description
@@ -40,18 +43,6 @@ Cleanup:
     
    
 End Sub
-
-Public Function save(sql As String) As ADODB.Recordset
-On Error GoTo Cleanup
-    Set save = connection.execute(sql)
-Cleanup:
-    If (Err.Number <> 0) Then
-        Debug.Print Err.Description
-        If (Not (connection Is Nothing) And connection.State = ObjectStateEnum.adStateOpen) Then
-            connection.Close
-        End If
-    End If
-End Function
 
 Public Sub endTransaction()
 On Error GoTo Cleanup
@@ -69,58 +60,28 @@ Cleanup:
 
 End Sub
 
-Public Function retrieveRecord(sql As String, cParameters As Collection) As Collection
 
-    Dim rs As New ADODB.Recordset
+Public Function runsql() As Collection
+On Error GoTo Cleanup
+    Dim rs As New ADODB.recordset
     Dim result As New Collection
-    Dim oParamDictionary As scripting.Dictionary
-    Dim cmd As New ADODB.Command
-    Dim param As ADODB.parameter
     
-    ' Setup connection
-    Set connection = New ADODB.connection
-    connection.Open (connectionString)
-    cmd.ActiveConnection = connection
-    
-    ' Build SQL and plug parameters
-    cmd.CommandText = sql
-    For Each oParamDictionary In cParameters
-        Set param = cmd.createParameter(, oParamDictionary.Item("type"), adParamInput)
-        param.value = oParamDictionary.Item("value")
-        
-        cmd.parameters.Append param
-    Next oParamDictionary
-    
-    ' Retrieve result
     Set rs = cmd.execute
        
     ' Construct result as collection
-    Do While Not rs.EOF
-        result.Add rs
-        rs.MoveNext
-    Loop
-    rs.Close
+    If (rs.State > 0) Then
+        Do While Not rs.EOF
+            result.Add rs
+            rs.MoveNext
+        Loop
+    End If
     
-    Set retrieveRecord = result
-   
+    Set runsql = result
+Cleanup:
+    If connection.State = adStateOpen Then
+        If (level > 1) Then
+            connection.RollbackTrans
+            connection.Close
+        End If
+    End If
 End Function
-
-Public Function createParameter(iType As Integer, vValue As Variant) As scripting.Dictionary
-
-    Dim parameter As New scripting.Dictionary
-    With parameter
-        .Add Key:="type", Item:=iType
-        .Add Key:="value", Item:=vValue
-    End With
-    
-    Set createParameter = parameter
-End Function
-
-
-
-
-
-
-
-
-
