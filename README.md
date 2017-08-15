@@ -8,27 +8,28 @@ This file simplify the use of ADODB for MSSQL connection
 ### Retrieve Record
 ```vba
 Public Sub TestRetrieve()
-    Dim dbconnection As New dbconnection
-    
-    ' https://support.microsoft.com/en-us/help/181734/how-to-invoke-a-parameterized-ado-query-using-vba-c-java
-    Dim parameters As New Collection
-    With parameters
-        .Add dbconnection.createParameter(adInteger, 1)
-        .Add dbconnection.createParameter(adInteger, 2)
+    Call dbconnection.beginTransaction
+    With dbconnection.cmd
+        .parameters.Append .createParameter(, DataTypeEnum.adInteger, ParameterDirectionEnum.adParamInput, , 10)
+        .parameters.Append .createParameter(, DataTypeEnum.adInteger, ParameterDirectionEnum.adParamInput, , 11)
+        .CommandText = "select * from assessmenttask where AT_id = ? or AT_id = ?"
     End With
-    
-    Call dbconnection.retrieveRecord("select * from assessmenttask where AT_id = ? or AT_id = ?", parameters)
+
+    Dim a As Collection
+    Set a = dbconnection.runsql
+    Call dbconnection.endTransaction
 End Sub
 ```
 ### Insert/ Update Record
 ```vba
 Public Sub TestSave()
-	Dim dbconnection As New dbconnection
-	Call dbconnection.beginTransaction
-	Dim rs as ADODB.Recordset
-	Set rs = dbconnection.save("Insert into....")
-	'OR
-	'Set rs = dbconnection.save("Update into....")
-	Call dbconnection.endTransaction
+    Call dbconnection.beginTransaction
+    With dbconnection.cmd
+        .parameters.Append .createParameter(, DataTypeEnum.adVarChar, ParameterDirectionEnum.adParamInput, 100, "PPP")
+        .CommandText = "update assessmenttask set task = ? where AT_id = 1"
+    End With
+
+    Call dbconnection.runsql
+    Call dbconnection.endTransaction
 End Sub
 ```
