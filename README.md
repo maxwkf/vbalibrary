@@ -2,7 +2,7 @@
 ## Description
 This file simplify the use of ADODB for MSSQL connection
 ## How to include this connection class?
-1. Include the Reference **Microsoft ActiveX Data Objects 6.1 Library
+1. Include the Reference **Microsoft ActiveX Data Objects 6.1 Library**
 2. In the Microsoft Visual Basic for Applications Editor, right click on the Class Modules and use the import file.
 ## Usage
 ### Retrieve Record
