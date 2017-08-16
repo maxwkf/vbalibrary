@@ -16,8 +16,7 @@ Public cmd As ADODB.command
 
 ' Event - triggered when class created
 Private Sub Class_Initialize()
-    connectionString = "Driver={SQL Server};Server={{Server}};Database=accreditation; UID={{UserID}}; PWD={{Password}}"
-    
+    connectionString = "Driver={SQL Server};Server=wt5.cs.cityu.edu.hk;Database=accreditation; UID=milo; PWD=milo1234"
 End Sub
 
 'https://www.youtube.com/watch?v=5Zv-iNyzMzI
@@ -33,15 +32,11 @@ On Error GoTo Cleanup
     
     Set cmd = New ADODB.command
     cmd.ActiveConnection = connection
+Exit Sub
 Cleanup:
-    If (Err.Number <> 0) Then
-        Debug.Print Err.Description
-        If (Not (connection Is Nothing) And connection.State = ObjectStateEnum.adStateOpen) Then
-            connection.Close
-        End If
+    If (Not (connection Is Nothing) And connection.State = ObjectStateEnum.adStateOpen) Then
+        connection.Close
     End If
-    
-   
 End Sub
 
 Public Sub endTransaction()
@@ -49,15 +44,11 @@ On Error GoTo Cleanup
 
     connection.CommitTrans
     connection.Close
-
+Exit Sub
 Cleanup:
-    If (Err.Number <> 0) Then
-        Debug.Print Err.Description
-        If (Not (connection Is Nothing) And connection.State = ObjectStateEnum.adStateOpen) Then
-            connection.Close
-        End If
+    If (Not (connection Is Nothing) And connection.State = ObjectStateEnum.adStateOpen) Then
+        connection.Close
     End If
-
 End Sub
 
 
@@ -77,6 +68,7 @@ On Error GoTo Cleanup
     End If
     
     Set runsql = result
+Exit Function
 Cleanup:
     If connection.State = adStateOpen Then
         If (level > 1) Then
@@ -84,4 +76,5 @@ Cleanup:
             connection.Close
         End If
     End If
+    Debug.Print Err.Description
 End Function
