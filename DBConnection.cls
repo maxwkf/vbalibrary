@@ -51,23 +51,36 @@ Cleanup:
     End If
 End Sub
 
-
+' Return collection of recordset as dictionary
 Public Function runsql() As Collection
 On Error GoTo Cleanup
     Dim rs As New ADODB.recordset
     Dim result As New Collection
+    Dim row As Scripting.Dictionary
+    Dim fields As fields
+    Dim field As field
     
     Set rs = cmd.execute
-       
+    
     ' Construct result as collection
     If (rs.State > 0) Then
         Do While Not rs.EOF
-            result.Add rs
+            Set row = New Scripting.Dictionary
+            Set fields = rs.fields
+            
+            For Each field In fields
+                row.Add Key:=field.Name, Item:=Trim(field.Value)
+            Next field
+            result.Add row
             rs.MoveNext
         Loop
+        
+        Set runsql = result
+    Else
+        Set runsql = Nothing
     End If
     
-    Set runsql = result
+    
 Exit Function
 Cleanup:
     If connection.State = adStateOpen Then
@@ -77,4 +90,16 @@ Cleanup:
         End If
     End If
     Debug.Print Err.Description
+End Function
+
+Public Function getRecordsetCount(rs As ADODB.recordset) As Integer
+
+   If rs.EOF Then
+      getRecordsetCount = 0
+   Else
+      rs.MoveLast
+      getRecordsetCount = rs.RecordCount
+   End If
+   rs.MoveFirst
+
 End Function
