@@ -1,4 +1,4 @@
-# vbalibrary
+# DBConnection.cls
 ## Description
 This file simplify the use of ADODB for MSSQL connection
 ## How to include this connection class?

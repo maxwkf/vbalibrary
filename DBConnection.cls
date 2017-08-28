@@ -9,6 +9,8 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
+' 2070817: just found the whole Microsoft reference for the database connection
+' https://docs.microsoft.com/en-us/sql/ado/reference/ado-api/ado-code-examples-in-visual-basic
 Public connection As ADODB.connection
 Private connectionString As String
 Private level As Integer
