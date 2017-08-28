@@ -1,12 +1,11 @@
-Attribute VB_Name = "MRangeExtend"
 Option Explicit
 
 ' @param Variant target - This can be Cells(1,1) or Range("B4") or Range("B4:C9") format
 '   cannot be Range("B") or Range(1)
 ' @return Collection - collection.Item("Column") => "B" / "B:C"
 '   collection.Item("Row") => 4 / "4:9"
-Public Function getColumnRowAddress(target As Variant) As scripting.Dictionary
-    Dim result As New scripting.Dictionary
+Public Function getColumnRowAddress(target As Variant) As Scripting.Dictionary
+    Dim result As New Scripting.Dictionary
 
     Dim r As Range
     Set r = target
@@ -22,8 +21,8 @@ Public Function getColumnRowAddress(target As Variant) As scripting.Dictionary
     Dim row1 As Integer
     Dim row2 As Integer
     
-    Dim columnRowSet1 As scripting.Dictionary
-    Dim columnRowSet2 As scripting.Dictionary
+    Dim columnRowSet1 As Scripting.Dictionary
+    Dim columnRowSet2 As Scripting.Dictionary
     
     If MCommon.ArraySize(WrdArray) > 0 Then
         Set columnRowSet1 = splitColumnAndRowAddress(WrdArray(0))
@@ -35,8 +34,8 @@ Public Function getColumnRowAddress(target As Variant) As scripting.Dictionary
 
     If Not columnRowSet1 Is Nothing Then
         If Not columnRowSet2 Is Nothing Then
-            result.Add columnRowSet1.Item("Column") & ":" & columnRowSet2.Item("Column"), "Column"
-            result.Add columnRowSet1.Item("Row") & ":" & columnRowSet2.Item("Row"), "Row"
+            result.Add Item:=columnRowSet1.Item("Column") & ":" & columnRowSet2.Item("Column"), Key:="Column"
+            result.Add Item:=columnRowSet1.Item("Row") & ":" & columnRowSet2.Item("Row"), Key:="Row"
         Else
             Set result = columnRowSet1
         End If
@@ -48,7 +47,7 @@ End Function
 
 ' Only accept Range("AB12") style but not Range("AB12:CC13")
 '   only if for single column or row use Range("B:B")
-Public Function splitColumnAndRowAddress(rangeStr As String) As scripting.Dictionary
+Public Function splitColumnAndRowAddress(rangeStr As String) As Scripting.Dictionary
     Dim lnRow As String
     Dim strCol As String
     
@@ -62,8 +61,8 @@ Public Function splitColumnAndRowAddress(rangeStr As String) As scripting.Dictio
         strCol = Left(rangeStr, Len(rangeStr) - Len(CStr(lnRow)))
     End If
     
-    Dim dict As scripting.Dictionary
-    Set dict = New scripting.Dictionary
+    Dim dict As Scripting.Dictionary
+    Set dict = New Scripting.Dictionary
     
     dict.Add Key:="Column", Item:=strCol
     dict.Add Key:="Row", Item:=lnRow
@@ -80,4 +79,10 @@ Public Sub simpleRangeSort(rangeStr As String, Optional Sht As String = vbNullSt
     End If
     currentSheet.Select
     Range(rangeStr).Sort key1:=Range(rangeStr), order1:=xlAscending, Header:=xlNo
+End Sub
+
+' Print the result column and range then get from function getColumnRowAddress
+'   The output format is like "Column: J:J Row: 2:5"
+Public Sub printRangeDict(rngDict As Scripting.Dictionary)
+    Debug.Print "Column: " & rngDict.Item("Column") & " Row: " & CStr(rngDict.Item("Row"))
 End Sub
